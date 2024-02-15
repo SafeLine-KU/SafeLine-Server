@@ -19,4 +19,11 @@ class MongoDB:
             self.client.close()
 
 load_dotenv()
-mongodb = MongoDB()
+
+async def get_mongodb():
+    mongodb = MongoDB()
+    try:
+        mongodb.connect()
+        yield mongodb
+    finally:
+        mongodb.close()
