@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-from dotenv import load_dotenv
 import os
 
 class MongoDB:
@@ -17,8 +16,6 @@ class MongoDB:
     def close(self):
         if self.client:
             self.client.close()
-
-load_dotenv()
 
 async def get_mongodb():
     mongodb = MongoDB()
