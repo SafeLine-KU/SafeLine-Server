@@ -1,26 +1,27 @@
-from pymongo import MongoClient
+from google.cloud import bigquery
+from google.oauth2 import service_account
 import os
 
-class MongoDB:
+class BigQueryClient:
     def __init__(self):
-        db_host = os.getenv("MONGODB_HOST")
-        db_port = os.getenv("MONGODB_PORT")
-        db_username = os.getenv("MONGODB_USER")
-        db_password = os.getenv("MONGODB_PW")
-        self.uri = f"mongodb://{db_username}:{db_password}@{db_host}:{db_port}/"
+        self.dataset_id = os.getenv("GCP_BIGQUERY_DATASET_ID")
+        self.credentials = service_account.Credentials.from_service_account_file(os.getenv("GCP_SERVICE_ACCOUNT"))
         self.client = None
 
     def connect(self):
-        self.client = MongoClient(self.uri)
+        self.client = bigquery.Client(
+                            credentials=self.credentials,
+                            project=self.credentials.project_id
+                        )
 
     def close(self):
         if self.client:
             self.client.close()
 
-async def get_mongodb():
-    mongodb = MongoDB()
+async def get_bigquery():
+    bigquery_client = BigQueryClient()
     try:
-        mongodb.connect()
-        yield mongodb
+        bigquery_client.connect()
+        yield bigquery_client
     finally:
-        mongodb.close()
+        bigquery_client.close()
