@@ -1,5 +1,6 @@
 import google.generativeai as genai
 from openai import OpenAI
+from typing import Optional, List
 import os
 
 from resources.prompt import prompts
@@ -25,3 +26,20 @@ class InstructionService:
             n=1,
         )
         return response.data[0].url
+
+    async def get_quiz_data(self, db, disaster_type: Optional[List[str]] = None, size: int = 10):
+        query = f"""
+        SELECT *, rand() as rand
+        FROM {db.dataset_id}.quiz
+        CROSS JOIN UNNEST(disaster_type) as disaster
+        """
+
+        if disaster_type is not None:
+            types_str = "','".join(disaster_type)
+            query += f"WHERE disaster IN ('{types_str}') "
+
+        query += f"ORDER BY rand LIMIT {size};"
+        query_job = db.client.query(query)
+        results = query_job.result()
+
+        return results
